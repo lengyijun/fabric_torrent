@@ -1,0 +1,34 @@
+ [fabric_sdk_go] 2018/02/18 13:34:15 UTC - config.initConfig -> INFO config fabric_sdk_go logging level is set to: INFO
+create channel failed: failed broadcast to orderer: Orderer Server Status Code: (400) BAD_REQUEST. Description: Failed to reach implicit threshold of 1 sub-policies, required 1 remaining: permission denied
+ [fabric_sdk_go] 2018/02/18 13:34:20 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = chaincode error (status: 500, message: Cannot create ledger from genesis block, due to LedgerID already exists)
+Org1 peers failed to JoinChannel: %s join channel failed: SendProposal failed: Transaction processing for endorser [peer0.org1.example.com:7051]: gRPC Transport Status Code: (2) Unknown. Description: chaincode error (status: 500, message: Cannot create ledger from genesis block, due to LedgerID already exists)
+ [fabric_sdk_go] 2018/02/18 13:34:20 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = chaincode error (status: 500, message: Cannot create ledger from genesis block, due to LedgerID already exists)
+Org2 peers failed to JoinChannel: %s join channel failed: SendProposal failed: Transaction processing for endorser [peer0.org2.example.com:8051]: gRPC Transport Status Code: (2) Unknown. Description: chaincode error (status: 500, message: Cannot create ledger from genesis block, due to LedgerID already exists)
+lstat ../fixtures/testdata/src/github.com/dht_server: no such file or directory
+Chaincode name, version, path and chaincode package are required
+Chaincode name, version, path and chaincode package are required
+lstat ../fixtures/testdata/src/github.com/upload: no such file or directory
+Chaincode name, version, path and chaincode package are required
+Chaincode name, version, path and chaincode package are required
+ [fabric_sdk_go] 2018/02/18 13:34:30 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = chaincode error (status: 500, message: cannot get package for the chaincode to be instantiated (dht_server:0)-open /var/hyperledger/production/chaincodes/dht_server.0: no such file or directory)
+sending deploy transaction proposal failed: Transaction processing for endorser [peer0.org1.example.com:7051]: gRPC Transport Status Code: (2) Unknown. Description: chaincode error (status: 500, message: cannot get package for the chaincode to be instantiated (dht_server:0)-open /var/hyperledger/production/chaincodes/dht_server.0: no such file or directory)
+ [fabric_sdk_go] 2018/02/18 13:34:35 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = chaincode error (status: 500, message: cannot get package for the chaincode to be instantiated (upload:0)-open /var/hyperledger/production/chaincodes/upload.0: no such file or directory)
+sending deploy transaction proposal failed: Transaction processing for endorser [peer0.org1.example.com:7051]: gRPC Transport Status Code: (2) Unknown. Description: chaincode error (status: 500, message: cannot get package for the chaincode to be instantiated (upload:0)-open /var/hyperledger/production/chaincodes/upload.0: no such file or directory)
+magnet:?xt=urn:btih:b7040d835a35e0f9ef946f0dc9f44bacb7a463f2&dn=config_test.yaml
+ [fabric_sdk_go] 2018/02/18 13:34:35 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+ [fabric_sdk_go] 2018/02/18 13:34:35 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+Failed to add a magnetlink: %s Multiple errors occurred: 
+Transaction processing for endorser [peer0.org2.example.com:8051]: gRPC Transport Status Code: (2) Unknown. Description: make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+Transaction processing for endorser [peer0.org1.example.com:7051]: gRPC Transport Status Code: (2) Unknown. Description: make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+magnet:?xt=urn:btih:4b6a1fe45384c3e06dad104aa068c054dfca271e&dn=a.jpg
+ [fabric_sdk_go] 2018/02/18 13:34:41 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+ [fabric_sdk_go] 2018/02/18 13:34:41 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+Failed to add a magnetlink: %s Multiple errors occurred: 
+Transaction processing for endorser [peer0.org2.example.com:8051]: gRPC Transport Status Code: (2) Unknown. Description: make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+Transaction processing for endorser [peer0.org1.example.com:7051]: gRPC Transport Status Code: (2) Unknown. Description: make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+ [fabric_sdk_go] 2018/02/18 13:34:51 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+ [fabric_sdk_go] 2018/02/18 13:34:51 UTC - peer.(*peerEndorser).sendProposal -> ERRO NewEndorserClient failed, cause : rpc error: code = Unknown desc = make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+Failed to query funds: %s Multiple errors occurred: 
+Transaction processing for endorser [peer0.org2.example.com:8051]: gRPC Transport Status Code: (2) Unknown. Description: make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+Transaction processing for endorser [peer0.org1.example.com:7051]: gRPC Transport Status Code: (2) Unknown. Description: make sure the chaincode upload has been successfully instantiated and try again: could not find chaincode with name 'upload'
+query chaincode of upload:  
