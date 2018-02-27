@@ -108,11 +108,11 @@ func main() {
 
 	time.Sleep(time.Second * 5)
 
-	loadPkg, err := packager.NewCCPackage("github.com/upload", "../fixtures/testdata")
+	loadPkg, err := packager.NewCCPackage("github.com/myapp", "../fixtures/testdata")
 	if err != nil {
 		fmt.Println(err)
 	}
-	installUploadReq := resmgmt.InstallCCRequest{Name: "upload", Path: "github.com/upload", Version: "0", Package:loadPkg}
+	installUploadReq := resmgmt.InstallCCRequest{Name: "myapp", Path: "github.com/myapp", Version: "0", Package:loadPkg}
 
 	_, err = org1ResMgmt.InstallCC(installUploadReq)
 	if err != nil {
@@ -136,7 +136,7 @@ func main() {
 
 	time.Sleep(time.Second * 5)
 
-	err = org1ResMgmt.InstantiateCC("orgchannel", resmgmt.InstantiateCCRequest{Name: "upload", Path: "github.com/upload", Version: "0", Args:upload_InitArgs, Policy: ccPolicy})
+	err = org1ResMgmt.InstantiateCC("orgchannel", resmgmt.InstantiateCCRequest{Name: "myapp", Path: "github.com/myapp", Version: "0", Args:upload_InitArgs, Policy: ccPolicy})
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -171,8 +171,9 @@ func main() {
 		if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
 			d := makeMagnet(dataPath, x.Name(), client)
 			fmt.Println(d)
-			upload_AddArgs := [][]byte{[]byte("add"), []byte(d),[]byte("myipaddr")}
-			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "upload", Fcn: "invoke", Args:upload_AddArgs})
+			//upload_AddArgs := [][]byte{[]byte("add"), []byte(d),[]byte("myipaddr")}
+			upload_AddArgs := [][]byte{[]byte("filename"),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
+			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
 			if err != nil {
 				fmt.Println("Failed to add a magnetlink: %s", err)
 			}
@@ -182,7 +183,8 @@ func main() {
 
 	time.Sleep(time.Second * 5)
 
-	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "upload", Fcn: "invoke", Args: upload_QueryArgs})
+	//todo query file
+	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "invoke", Args: upload_QueryArgs})
 	if err != nil {
 			  fmt.Println("Failed to query funds: %s", err)
 			  }

@@ -102,8 +102,8 @@ func main() {
 		if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
 			d := makeMagnet(dataPath, x.Name(), torrentClient)
 			fmt.Println(d)
-			upload_AddArgs := [][]byte{[]byte("add"), []byte(d),[]byte("myipaddr")}
-			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "upload", Fcn: "invoke", Args:upload_AddArgs})
+			upload_AddArgs := [][]byte{[]byte("filename"),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
+			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
 			if err != nil {
 				fmt.Println("Failed to add a magnetlink: %s", err)
 			}
@@ -122,7 +122,7 @@ func main() {
 		download(torrentClient,v)
 	}
 */
-testChaincodeEventListener("upload",chClientOrg1User, torrentClient)
+testChaincodeEventListener("myapp",chClientOrg1User, torrentClient)
 	// replace end
 
 	select {}
