@@ -13,6 +13,7 @@ import (
 	"github.com/anacrolix/torrent/metainfo"
 	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uiprogress"
+	"github.com/hyperledger/fabric-sdk-go/api/apitxn/chclient"
 )
 
 func generateClientAddrs(inputaddr [] string) (func  ()(addrs []dht.Addr,err error)){
@@ -31,6 +32,7 @@ func generateClientAddrs(inputaddr [] string) (func  ()(addrs []dht.Addr,err err
 
 	}
 }
+
 func clientAddrs(inputaddr []string) (addrs []dht.Addr, err error) {
 	for _, s := range (inputaddr) {
 		ua, err := net.ResolveUDPAddr("udp4", s)
@@ -101,4 +103,36 @@ func download(client * torrent.Client,magnetUrl string){
 		t.DownloadAll()
 	}()
 	uiprogress.Start()
+}
+
+func testChaincodeEventListener(ccID string, listener chclient.ChannelClient,torrentClient * torrent.Client) {
+
+	eventID := "upload"
+
+	// Register chaincode event (pass in channel which receives event details when the event is complete)
+	notifier := make(chan *chclient.CCEvent)
+	rce, err := listener.RegisterChaincodeEvent(notifier, ccID, eventID)
+	if err != nil {
+		fmt.Println("Failed to register cc event: %s", err)
+	}
+
+
+	for{
+		select {
+		case ccEvent := <-notifier:
+			fmt.Println("event happened")
+			download(torrentClient,string(ccEvent.Payload))
+
+			//case <-time.After(time.Second * 20):
+			//	t.Fatalf("Did NOT receive CC for eventId(%s)\n", eventID)
+		}
+
+	}
+
+	// Unregister chain code event using registration handle
+	err = listener.UnregisterChaincodeEvent(rce)
+	if err != nil {
+		fmt.Println("Unregister cc event failed: %s", err)
+	}
+
 }

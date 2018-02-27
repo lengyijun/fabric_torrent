@@ -170,6 +170,7 @@ func (t *SimpleChaincode) add(stub shim.ChaincodeStubInterface, args []string) p
 			return shim.Success(transientData)
 		}
 	}
+	stub.SetEvent("upload",[]byte(args[1]))
 
 	return shim.Success(nil)
 

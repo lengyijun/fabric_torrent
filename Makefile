@@ -292,7 +292,7 @@ dockerenv-prev-up: clean
 		FABRIC_SDKGO_CODELEVEL_VER=$(FABRIC_PREV_CODELEVEL_VER) FABRIC_SDKGO_CODELEVEL_TAG=$(FABRIC_PREV_CODELEVEL_TAG) FABRIC_DOCKER_REGISTRY=$(FABRIC_RELEASE_REGISTRY)/ $(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up --force-recreate
 
 .PHONY: dockerenv-stable-up
-dockerenv-stable-up: clean
+dockerenv-stable-up: clean gobuild
 	@cd $(FIXTURE_DOCKERENV_PATH) && \
 		FABRIC_SDKGO_CODELEVEL_VER=$(FABRIC_STABLE_CODELEVEL_VER) FABRIC_SDKGO_CODELEVEL_TAG=$(FABRIC_STABLE_CODELEVEL_TAG) FABRIC_DOCKER_REGISTRY=$(FABRIC_RELEASE_REGISTRY)/ $(DOCKER_COMPOSE_CMD) -f docker-compose.yaml up --force-recreate
 
@@ -398,3 +398,7 @@ clean: temp-clean
 	-$(GO_CMD) clean
 	-FIXTURE_PROJECT_NAME=$(FIXTURE_PROJECT_NAME) DOCKER_REMOVE_FORCE=$(FIXTURE_DOCKER_REMOVE_FORCE) $(TEST_SCRIPTS_PATH)/clean_integration.sh
 
+.PHONY: gobuild
+gobuild:
+	@cd test/torrent_cli && go build
+	@cd test/torrent_server && go build

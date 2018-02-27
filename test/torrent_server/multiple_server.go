@@ -7,9 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package main 
 
 import (
-	//"math"
 	"path"
-	//"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/config"
@@ -24,19 +22,12 @@ import (
 	chmgmt "github.com/hyperledger/fabric-sdk-go/api/apitxn/chmgmtclient"
 	resmgmt "github.com/hyperledger/fabric-sdk-go/api/apitxn/resmgmtclient"
 
-	//"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk/factory/defsvc"
-
-	//selection "github.com/hyperledger/fabric-sdk-go/pkg/fabric-txn/selection/dynamicselection"
-
 	"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/common/cauthdsl"
 	"fmt"
 	"os"
 
-	//"path/filepath"
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
-	//"github.com/anacrolix/torrent/bencode"
-	//"github.com/anacrolix/torrent/metainfo"
 )
 
 const (
@@ -286,6 +277,7 @@ func loadOrgPeers( sdk *fabsdk.FabricSDK) {
 	}
 }
 
+//todo get hostname dynamicly
 var dhtserver_Initargs= [][]byte{[]byte("init"), []byte("dht_server"), []byte("server:6666")}
 var dht_queryArgs = [][]byte{[]byte("query"), []byte("dht_server")}
 

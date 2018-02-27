@@ -219,7 +219,7 @@ services:
     image: hyperledger/fabric-tools
     working_dir: /test/torrent_server
 #    command: make integration-tests-local
-    command: tail -F anything
+    command: ./torrent_server
     volumes:
         - ~/go:/opt/gopath
         - ../../../test:/test
@@ -238,7 +238,6 @@ services:
   cli:
     image: hyperledger/fabric-tools
     working_dir: /test/torrent_cli
-#    command: make integration-tests-local
     command: tail -F anything
     volumes:
         - ~/go:/opt/gopath

@@ -7,13 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 package main 
 
 import (
-	//"math"
 	"path"
-	//"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/config"
-	//packager "github.com/hyperledger/fabric-sdk-go/pkg/fabric-client/ccpackager/gopackager"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabric-client/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 	"github.com/pkg/errors"
@@ -22,27 +19,15 @@ import (
 	fab "github.com/hyperledger/fabric-sdk-go/api/apifabclient"
 	"github.com/hyperledger/fabric-sdk-go/api/apitxn/chclient"
 	chmgmt "github.com/hyperledger/fabric-sdk-go/api/apitxn/chmgmtclient"
-	//resmgmt "github.com/hyperledger/fabric-sdk-go/api/apitxn/resmgmtclient"
-
-	//"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk/factory/defsvc"
-
-	//selection "github.com/hyperledger/fabric-sdk-go/pkg/fabric-txn/selection/dynamicselection"
-
-	//"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/common/cauthdsl"
 	"fmt"
 	"os"
 
-	//"path/filepath"
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
-	//"github.com/anacrolix/torrent/bencode"
-	//"github.com/anacrolix/torrent/metainfo"
-	"strings"
-	//"github.com/elves/elvish/edit/ui"
 )
 
 const (
-	dataPath="data"
+	dataPath	= "data"
 	org1        = "Org1"
 	org2        = "Org2"
 )
@@ -62,7 +47,7 @@ func main() {
 		fmt.Println("Failed to create new SDK: %s", err)
 	}
 
-	// Channel management client is responsible for managing channels (create/update channel)
+	// Channel management torrentClient is responsible for managing channels (create/update channel)
 	chMgmtClient, err := sdk.NewClient(fabsdk.WithUser("Admin"), fabsdk.WithOrg("ordererorg")).ChannelMgmt()
 	if err != nil {
 		fmt.Println(err)
@@ -81,26 +66,33 @@ func main() {
 	// Load specific targets for move funds test
 	loadOrgPeers( sdk)
 
+	clientConfig := torrent.Config{}
 	// Org1 user connects to 'orgchannel'
 	chClientOrg1User, err := sdk.NewClient(fabsdk.WithUser("User1"), fabsdk.WithOrg(org1)).Channel("orgchannel")
 	if err != nil {
-		fmt.Println("Failed to create new channel client for Org1 user: %s", err)
+		fmt.Println("Failed to create new channel torrentClient for Org1 user: %s", err)
 	}
-	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "dht_server", Fcn: "invoke", Args: dht_queryArgs})
-	fmt.Println(upload_response.Payload)
+	for{
+		upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "dht_server", Fcn: "invoke", Args: dht_queryArgs})
+		if err !=nil || string(upload_response.Payload)=="" || upload_response.Payload==nil{
+			fmt.Println("another try in getting server address")
+			time.Sleep(20*time.Second)
+		}else{
+			clientConfig.DHTConfig = dht.ServerConfig{
+				StartingNodes:generateClientAddrs([]string {string(upload_response.Payload)}),
+			}
+			fmt.Println("finally get the server address")
+			break
+		}
+	}
 
-
-	clientConfig := torrent.Config{}
 	clientConfig.Seed = true
 	clientConfig.Debug = true
 	clientConfig.DisableTrackers = true
 	clientConfig.ListenAddr = "0.0.0.0:6666"
-	clientConfig.DHTConfig = dht.ServerConfig{
-		StartingNodes:generateClientAddrs([]string {string(upload_response.Payload)}),
-	}
 	clientConfig.DataDir = dataPath
 	clientConfig.DisableAggressiveUpload = false
-	client, _ := torrent.NewClient(&clientConfig)
+	torrentClient, _ := torrent.NewClient(&clientConfig)
 
 	dir, _ := os.Open(dataPath)
 	defer dir.Close()
@@ -108,7 +100,7 @@ func main() {
 	fi, _ := dir.Readdir(-1)
 	for _, x := range fi {
 		if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
-			d := makeMagnet(dataPath, x.Name(), client)
+			d := makeMagnet(dataPath, x.Name(), torrentClient)
 			fmt.Println(d)
 			upload_AddArgs := [][]byte{[]byte("add"), []byte(d),[]byte("myipaddr")}
 			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "upload", Fcn: "invoke", Args:upload_AddArgs})
@@ -119,14 +111,19 @@ func main() {
 	}
 
 	time.Sleep(time.Second * 5)
-	upload_response, err = chClientOrg1User.Execute(chclient.Request{ChaincodeID: "upload", Fcn: "invoke", Args:upload_QueryArgs})
+//replace start
+/*
+	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "upload", Fcn: "invoke", Args:upload_QueryArgs})
 	available_magnets :=strings.Split(string(upload_response.Payload),",")
 	fmt.Printf("%q\n",available_magnets)
 
 	for _,v := range available_magnets {
 		fmt.Println(v)
-		download(client,v)
+		download(torrentClient,v)
 	}
+*/
+testChaincodeEventListener("upload",chClientOrg1User, torrentClient)
+	// replace end
 
 	select {}
 	/*
@@ -159,17 +156,17 @@ func main() {
 	// This user has to have privileges to query lscc for chaincode data
 	mychannelUser := selection.ChannelUser{ChannelID: "orgchannel", UserName: "User1", OrgName: "Org1"}
 
-	// Create SDK setup for channel client with dynamic selection
+	// Create SDK setup for channel torrentClient with dynamic selection
 	sdk, err = fabsdk.New(config.FromFile("./config_test.yaml"),
 		fabsdk.WithServicePkg(&DynamicSelectionProviderFactory{ChannelUsers: []selection.ChannelUser{mychannelUser}}))
 	if err != nil {
 		fmt.Println("Failed to create new SDK: %s", err)
 	}
 
-	// Create new client that will use dynamic selection
+	// Create new torrentClient that will use dynamic selection
 	chClientOrg2User, err = sdk.NewClient(fabsdk.WithUser("User1"), fabsdk.WithOrg(org2)).Channel("orgchannel")
 	if err != nil {
-		fmt.Println("Failed to create new channel client for Org2 user: %s", err)
+		fmt.Println("Failed to create new channel torrentClient for Org2 user: %s", err)
 	}
 
 	// Org2 user moves funds (dynamic selection will inspect chaincode policy to determine endorsers)
