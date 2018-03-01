@@ -79,6 +79,10 @@ func (s *SmartContract) createFile(APIstub shim.ChaincodeStubInterface, args []s
     // we need a relational database as an addition to leveldb
     // edit here when custom interface is ready
     // we currently use composite key with keyword name and owner.
+
+    //args[2]: keyword
+    //args[0]: Name
+    //uname:
     keys := []string{args[2], args[0], uname}
     ckey, err := APIstub.CreateCompositeKey("File", keys)
     if err != nil {

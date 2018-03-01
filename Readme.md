@@ -1,8 +1,8 @@
-##related folder
+## related folder
 - torrent_cli
 - torrent_server
 
-##how to run
+## how to run
 first put seeded file under torrent_server/data
 ```$xslt
 make  dockerenv-stable-up

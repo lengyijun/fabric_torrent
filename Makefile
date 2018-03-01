@@ -402,3 +402,4 @@ clean: temp-clean
 gobuild:
 	@cd test/torrent_cli && go build
 	@cd test/torrent_server && go build
+	@cd test/torrent_test_keyexange && go build

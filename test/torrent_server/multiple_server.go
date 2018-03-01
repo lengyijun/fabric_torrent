@@ -126,6 +126,24 @@ func main() {
 
 	time.Sleep(time.Second * 5)
 
+	loadPkg, err = packager.NewCCPackage("github.com/keyExchange", "../fixtures/testdata")
+	if err != nil {
+		fmt.Println(err)
+	}
+	installUploadReq = resmgmt.InstallCCRequest{Name: "keyExchange", Path: "github.com/keyExchange", Version: "0", Package:loadPkg}
+
+	_, err = org1ResMgmt.InstallCC(installUploadReq)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	_, err = org2ResMgmt.InstallCC(installUploadReq)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	time.Sleep(time.Second * 5)
+
 	// Set up chaincode policy to 'any of two msps'
 	ccPolicy := cauthdsl.SignedByAnyMember([]string{"Org1MSP", "Org2MSP"})
 
@@ -141,6 +159,10 @@ func main() {
 		fmt.Println(err)
 	}
 
+	err = org1ResMgmt.InstantiateCC("orgchannel", resmgmt.InstantiateCCRequest{Name: "keyExchange", Path: "github.com/keyExchange", Version: "0", Args:[][]byte{}, Policy: ccPolicy})
+	if err != nil {
+		fmt.Println(err)
+	}
 	// Load specific targets for move funds test
 	loadOrgPeers( sdk)
 
@@ -173,9 +195,11 @@ func main() {
 			fmt.Println(d)
 			//upload_AddArgs := [][]byte{[]byte("add"), []byte(d),[]byte("myipaddr")}
 			upload_AddArgs := [][]byte{[]byte("filename"),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
-			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
+			response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
 			if err != nil {
 				fmt.Println("Failed to add a magnetlink: %s", err)
+			}else{
+				fmt.Println("username : ",string(response.Payload))
 			}
 			time.Sleep(time.Second*5)
 		}
@@ -184,13 +208,19 @@ func main() {
 	time.Sleep(time.Second * 5)
 
 	//todo query file
-	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "invoke", Args: upload_QueryArgs})
+	//query chaincode of upload:
+	// [{"Key":{"objectType":File", "attributes":["keywords", "filename", "User1@org1.example.com"]},
+		// "Record":{"name":"filename","hash":"hash","keyword":"keywords","summary":"Summary","owner":"User1@org1.example.com","locktime":0,"Magnet":"magnet:?xt=urn:btih:4b6a1fe45384c3e06dad104aa068c054dfca271e\u0026dn=a.jpg"}}]
+
+
+	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "queryFile", Args: upload_QueryArgs})
 	if err != nil {
 			  fmt.Println("Failed to query funds: %s", err)
 			  }
 	upload_initial :=upload_response.Payload
 	fmt.Println("query chaincode of upload: ",string(upload_initial))
 
+	testChaincodeEventListener("keyExchange",chClientOrg1User)
 	/*
 
 
@@ -284,7 +314,7 @@ var dhtserver_Initargs= [][]byte{[]byte("init"), []byte("dht_server"), []byte("s
 var dht_queryArgs = [][]byte{[]byte("query"), []byte("dht_server")}
 
 var upload_InitArgs = [][]byte{[]byte("init"),[]byte("init"),[]byte("")}
-var upload_QueryArgs = [][]byte{[]byte("query"), []byte("init")}
+var upload_QueryArgs = [][]byte{[]byte("keywords")}
 
 func DhtServerInitArgs() [][]byte {
 	return dhtserver_Initargs
