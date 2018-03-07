@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package main 
 
 import (
-	"path"
+	//"path"
 	"time"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/config"
@@ -18,7 +18,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/api/apiconfig"
 	fab "github.com/hyperledger/fabric-sdk-go/api/apifabclient"
 	"github.com/hyperledger/fabric-sdk-go/api/apitxn/chclient"
-	chmgmt "github.com/hyperledger/fabric-sdk-go/api/apitxn/chmgmtclient"
+	//chmgmt "github.com/hyperledger/fabric-sdk-go/api/apitxn/chmgmtclient"
 	"fmt"
 	"os"
 
@@ -48,17 +48,17 @@ func main() {
 	}
 
 	// Channel management torrentClient is responsible for managing channels (create/update channel)
-	chMgmtClient, err := sdk.NewClient(fabsdk.WithUser("Admin"), fabsdk.WithOrg("ordererorg")).ChannelMgmt()
-	if err != nil {
-		fmt.Println(err)
-	}
+	//chMgmtClient, err := sdk.NewClient(fabsdk.WithUser("Admin"), fabsdk.WithOrg("ordererorg")).ChannelMgmt()
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 
 	// Create channel (or update if it already exists)
-	org1AdminUser := loadOrgUser( sdk, org1, "Admin")
-	req := chmgmt.SaveChannelRequest{ChannelID: "orgchannel", ChannelConfig: path.Join("v1.1/channel/", "orgchannel.tx"), SigningIdentity: org1AdminUser}
-	if err = chMgmtClient.SaveChannel(req); err != nil {
-		fmt.Println(err)
-	}
+	//org1AdminUser := loadOrgUser( sdk, org1, "Admin")
+	//req := chmgmt.SaveChannelRequest{ChannelID: "orgchannel", ChannelConfig: path.Join("v1.1/channel/", "orgchannel.tx"), SigningIdentity: org1AdminUser}
+	//if err = chMgmtClient.SaveChannel(req); err != nil {
+	//	fmt.Println(err)
+	//}
 
 	// Allow orderer to process channel creation
 	time.Sleep(time.Second * 5)
@@ -81,7 +81,7 @@ func main() {
 			clientConfig.DHTConfig = dht.ServerConfig{
 				StartingNodes:generateClientAddrs([]string {string(upload_response.Payload)}),
 			}
-			fmt.Println("finally get the server address")
+			fmt.Println("finally get the server address: "+string(upload_response.Payload))
 			break
 		}
 	}

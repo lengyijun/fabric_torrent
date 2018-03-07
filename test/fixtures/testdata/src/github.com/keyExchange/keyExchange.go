@@ -8,7 +8,6 @@ import (
     "crypto/x509"
     "github.com/hyperledger/fabric/core/chaincode/shim"
     sc "github.com/hyperledger/fabric/protos/peer"
-    //"github.com/tinylib/msgp/_generated"
 )
 
 type SmartContract struct {
@@ -17,7 +16,7 @@ type SmartContract struct {
 
 type Request struct {
     From string `json:"from"`
-    To string `json:"To"`
+    To string `json:"to"`
     File string `json:"file"`
     RequestTime int64 `json:"requestTime"`
     ResponseTime int64 `json:"responseTime"`
@@ -26,17 +25,24 @@ type Request struct {
 
 type RequestMessage struct {
     From string `json:"from"`
-    To string `json:"To"`
+    To string `json:"to"`
     File string `json:"file"`
     TxID string `json:"tx_id"`
+    RequestTime int64 `json:"requestTime"`
 }
 
 type ResponseMessage struct {
     From string `json:"from"`
-    To []string `json:"To"`
+    To []string `json:"to"`
     File string `json:"file"`
     TxID []string `json:"tx_id"`
     Secret string `json:"secret"`
+    ResponseTime int64 `json:responseTime`
+}
+
+type ConfirmationMessage struct {
+    TxID string `json:"tx_id"`
+    ConfirmationTime int64 `json:"confirmationTime"`
 }
 
 type File struct {
@@ -77,8 +83,6 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 
 func (s *SmartContract) requestSecret(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-    fmt.Println("================requestSecret")
-    fmt.Println(args)
     if len(args) != 3 {
         return shim.Error("Incorrect number of arguments. Expecting 3 keys of file")
     }
@@ -116,7 +120,7 @@ func (s *SmartContract) requestSecret(APIstub shim.ChaincodeStubInterface, args 
         return shim.Error("Fail to call file chaincode")
     }
     if len(res.Payload) <= 2 {
-        return shim.Error("The file is not exist 2")
+        return shim.Error("The file is not exist")
     }
 
     // get timestamp and tx_id
@@ -133,7 +137,7 @@ func (s *SmartContract) requestSecret(APIstub shim.ChaincodeStubInterface, args 
     APIstub.PutState(tx_id, requestAsBytes)
 
     // broadcast an event
-    var message = RequestMessage{From: uname, To: args[2], File: ckey, TxID: tx_id}
+    var message = RequestMessage{From: uname, To: args[2], File: ckey, TxID: tx_id, RequestTime: timestamp.GetSeconds()}
     messageAsBytes, _ := json.Marshal(message)
     APIstub.SetEvent("requestSecret", messageAsBytes)
 
@@ -154,6 +158,7 @@ func (s *SmartContract) respondSecret(APIstub shim.ChaincodeStubInterface, args 
 
     var fileKey = ""
     var fromList []string
+    var timestampInt int64
 
     for _, req := range args[:len(args)-1] {
         // get the request record by tx_id
@@ -180,7 +185,8 @@ func (s *SmartContract) respondSecret(APIstub shim.ChaincodeStubInterface, args 
             return shim.Error(err.Error())
         }
         if request.ResponseTime == 0 {
-            request.ResponseTime = timestamp.GetSeconds()
+            timestampInt = timestamp.GetSeconds()
+            request.ResponseTime = timestampInt
         } else {
             return shim.Error("This request already has a response")
         }
@@ -195,7 +201,7 @@ func (s *SmartContract) respondSecret(APIstub shim.ChaincodeStubInterface, args 
     }
 
     // broadcast an event
-    var message = ResponseMessage{From: uname, To: fromList, File: fileKey, TxID: args[:len(args)-1], Secret: args[len(args)-1]}
+    var message = ResponseMessage{From: uname, To: fromList, File: fileKey, TxID: args[:len(args)-1], Secret: args[len(args)-1], ResponseTime: timestampInt}
     messageAsBytes, _ := json.Marshal(message)
     APIstub.SetEvent("respondSecret", messageAsBytes)
 
@@ -250,6 +256,10 @@ func (s *SmartContract) confirmSecret(APIstub shim.ChaincodeStubInterface, args 
     }
     requestAsBytes, _ = json.Marshal(request)
     APIstub.PutState(args[0], requestAsBytes)
+
+    var message = ConfirmationMessage{TxID: args[0], ConfirmationTime: timestamp.GetSeconds()} 
+    messageAsBytes, _ := json.Marshal(message)
+    APIstub.SetEvent("confirmSecret", messageAsBytes)
 
     return shim.Success(nil)
 }

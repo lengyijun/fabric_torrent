@@ -14,8 +14,18 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uiprogress"
 	"github.com/hyperledger/fabric-sdk-go/api/apitxn/chclient"
+	"encoding/json"
 )
 
+type File struct {
+	Name string `json:"name"`
+	Hash string `json:"hash"`
+	Keyword string `json:"keyword"`
+	Summary string `json:"summary"`
+	Owner string `json:"owner"`
+	Locktime int64 `json:"locktime"`
+	Magnet string
+}
 func generateClientAddrs(inputaddr [] string) (func  ()(addrs []dht.Addr,err error)){
 	return func()(addrs []dht.Addr,err error){
 		for _, s := range (inputaddr) {
@@ -107,7 +117,7 @@ func download(client * torrent.Client,magnetUrl string){
 
 func testChaincodeEventListener(ccID string, listener chclient.ChannelClient,torrentClient * torrent.Client) {
 
-	eventID := "upload"
+	eventID := "createFile"
 
 	// Register chaincode event (pass in channel which receives event details when the event is complete)
 	notifier := make(chan *chclient.CCEvent)
@@ -117,11 +127,13 @@ func testChaincodeEventListener(ccID string, listener chclient.ChannelClient,tor
 	}
 
 
+	var file=File{}
 	for{
 		select {
 		case ccEvent := <-notifier:
-			fmt.Println("event happened")
-			download(torrentClient,string(ccEvent.Payload))
+			fmt.Println("get Magnetlink "+string(ccEvent.Payload))
+			json.Unmarshal(ccEvent.Payload,&file)
+			download(torrentClient,file.Magnet)
 
 			//case <-time.After(time.Second * 20):
 			//	t.Fatalf("Did NOT receive CC for eventId(%s)\n", eventID)

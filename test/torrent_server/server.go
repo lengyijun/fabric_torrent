@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	//"os"
 	"path/filepath"
 
 	"github.com/anacrolix/dht"

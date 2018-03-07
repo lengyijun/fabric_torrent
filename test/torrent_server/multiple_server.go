@@ -28,6 +28,8 @@ import (
 
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
+	"github.com/radovskyb/watcher"
+	"log"
 )
 
 const (
@@ -172,7 +174,6 @@ func main() {
 		fmt.Println("Failed to create new channel client for Org1 user: %s", err)
 	}
 
-
 	clientConfig := torrent.Config{}
 	clientConfig.Seed = true
 	clientConfig.Debug = true
@@ -193,7 +194,6 @@ func main() {
 		if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
 			d := makeMagnet(dataPath, x.Name(), client)
 			fmt.Println(d)
-			//upload_AddArgs := [][]byte{[]byte("add"), []byte(d),[]byte("myipaddr")}
 			upload_AddArgs := [][]byte{[]byte("filename"),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
 			response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
 			if err != nil {
@@ -205,10 +205,45 @@ func main() {
 		}
 	}
 
+	w :=watcher.New()
+	go func(){
+		for{
+			select {
+			case event:=<-w.Event:
+				fmt.Println(event.Op)
+				if event.Op.String()=="CREATE"{
+					d:=makeMagnet(dataPath, event.Name(), client)
+					fmt.Println(d)
+					upload_AddArgs := [][]byte{[]byte("filename"),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
+					response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
+					if err != nil {
+						fmt.Println("Failed to add a magnetlink: %s", err)
+					}else{
+						fmt.Println("username : ",string(response.Payload))
+					}
+				}
+			case err:=<-w.Error:
+				log.Fatal(err)
+			case <-w.Closed:
+				return
+			}
+
+		}
+	}()
+	if err:=w.AddRecursive(dataPath);err!=nil{
+		log.Fatalln(err)
+	}
+	if err:=w.Ignore(dataPath+"/.torrent.bolt.db");err!=nil{
+		log.Fatalln(err)
+	}
+	if err:=w.Start(time.Millisecond*100);err!=nil{
+		log.Fatalln(err)
+	}
+
 	time.Sleep(time.Second * 5)
 
 	//todo query file
-	//query chaincode of upload:
+	//query chaincode of myapp:
 	// [{"Key":{"objectType":File", "attributes":["keywords", "filename", "User1@org1.example.com"]},
 		// "Record":{"name":"filename","hash":"hash","keyword":"keywords","summary":"Summary","owner":"User1@org1.example.com","locktime":0,"Magnet":"magnet:?xt=urn:btih:4b6a1fe45384c3e06dad104aa068c054dfca271e\u0026dn=a.jpg"}}]
 
@@ -218,7 +253,7 @@ func main() {
 			  fmt.Println("Failed to query funds: %s", err)
 			  }
 	upload_initial :=upload_response.Payload
-	fmt.Println("query chaincode of upload: ",string(upload_initial))
+	fmt.Println("query chaincode of myapp: ",string(upload_initial))
 
 	testChaincodeEventListener("keyExchange",chClientOrg1User)
 	/*

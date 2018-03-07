@@ -9,7 +9,6 @@ import (
     "strings"
     "github.com/hyperledger/fabric/core/chaincode/shim"
     sc "github.com/hyperledger/fabric/protos/peer"
-    //"github.com/tinylib/msgp/_generated"
 )
 
 type SmartContract struct {
@@ -90,7 +89,7 @@ func (s *SmartContract) createFile(APIstub shim.ChaincodeStubInterface, args []s
     }
     APIstub.PutState(ckey, fileAsBytes)
 
-    APIstub.SetEvent("upload",[]byte(args[4]))
+    APIstub.SetEvent("createFile", fileAsBytes);
     return shim.Success([]byte(uname))
 }
 
@@ -223,6 +222,7 @@ func (s *SmartContract) deleteFile(APIstub shim.ChaincodeStubInterface, args []s
         return shim.Error(err.Error())
     }
 
+    APIstub.SetEvent("deleteFile", []byte(ckey));
     return shim.Success([]byte(uname))
 }
 
