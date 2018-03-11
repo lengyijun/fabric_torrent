@@ -71,6 +71,18 @@ func (s *SmartContract) createFile(APIstub shim.ChaincodeStubInterface, args []s
         return shim.Error(err.Error())
     }
 
+    //check if exist a file with same name
+    //haven't tested
+    resultsIterator, err := APIstub.GetStateByPartialCompositeKey("File",[]string{args[0]})
+    if err != nil {
+        return shim.Error(err.Error())
+    }
+    defer resultsIterator.Close()
+
+    if resultsIterator.HasNext(){
+        return shim.Error("already exist a file having the same name")
+    }
+
     // create an object
     var file = File{Name: args[0], Hash: args[1], Keyword: args[2], Summary: args[3], Owner: uname, Locktime: 0,Magnet:args[4]}
     fileAsBytes, _ := json.Marshal(file)
@@ -105,7 +117,6 @@ func (s *SmartContract) queryFile(APIstub shim.ChaincodeStubInterface, args []st
 
     // get query result
     resultsIterator, err := APIstub.GetStateByPartialCompositeKey("File", args)
-
     if err != nil {
         return shim.Error(err.Error())
     }
