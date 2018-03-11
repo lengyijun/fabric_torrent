@@ -102,7 +102,7 @@ func main() {
 		if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
 			d := makeMagnet(dataPath, x.Name(), torrentClient)
 			fmt.Println(d)
-			upload_AddArgs := [][]byte{[]byte("filename"),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
+			upload_AddArgs := [][]byte{[]byte(x.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
 			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
 			if err != nil {
 				fmt.Println("Failed to add a magnetlink: %s", err)

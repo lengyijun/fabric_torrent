@@ -116,7 +116,7 @@ func loadOrgPeers( sdk *fabsdk.FabricSDK) {
 	}
 }
 
-var requestSecret_Args = [][]byte{[]byte("keywords"),[]byte("filename"),[]byte("User1@org1.example.com")}
+var requestSecret_Args = [][]byte{[]byte("keywords"),[]byte("a.jpg"),[]byte("User1@org1.example.com")}
 
 var upload_InitArgs = [][]byte{[]byte("init"),[]byte("init"),[]byte("myipaddr:port")}
 var upload_QueryArgs = [][]byte{[]byte("query"), []byte("init")}
