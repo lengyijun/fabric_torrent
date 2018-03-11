@@ -311,7 +311,7 @@ peers:
 #
 certificateAuthorities:
   ca.org1.example.com:
-    url: https://ca.org1.example.com:7054
+    url: http://ca.org1.example.com:7054
     # the properties specified under this object are passed to the 'http' client verbatim when
     # making the request to the Fabric-CA server
     httpOptions:
@@ -332,7 +332,7 @@ certificateAuthorities:
     # [Optional] The optional name of the CA.
     caName: ca.org1.example.com
   ca.org2.example.com:
-    url: https://ca.org2.example.com:8054
+    url: http://ca.org2.example.com:8054
     # the properties specified under this object are passed to the 'http' client verbatim when
     # making the request to the Fabric-CA server
     httpOptions:

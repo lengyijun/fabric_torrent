@@ -13,9 +13,9 @@ services:
       - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8791d1363e89515f9afa042b0693a2c704bb8dd95d28f97d3549a2b9e3c4352d_sk
-      - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com-key.pem
+        #- FABRIC_CA_SERVER_TLS_ENABLED=true
+        #- FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com.pem
+        #- FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com-key.pem
     #comment out logging.driver in order to render the debug logs
     #logging:
     #driver: none
@@ -37,12 +37,12 @@ services:
       - FABRIC_CA_SERVER_CA_NAME=ca.org2.example.com
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/a259204dbd6adb14c05a6e02de94567b2a9f7dbe9e6a063ba767d42bf0b544c1_sk
-      - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com-key.pem
+        #- FABRIC_CA_SERVER_TLS_ENABLED=true
+        #- FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com.pem
+        #- FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tls/server_wild_org1or2.example.com-key.pem
     #comment out logging.driver in order to render the debug logs
-    #logging:
-    #driver: none
+    logging:
+      driver: none
     ports:
       - "8054:8054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d -p 8054'
@@ -63,15 +63,15 @@ services:
       - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/twoorgs.genesis.block
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer
-      - ORDERER_GENERAL_TLS_ENABLED=true
-      - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/tls/orderer/server.key
-      - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/tls/orderer/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/tls/orderer/ca.crt]
-      - ORDERER_GENERAL_TLS_CLIENTAUTHENABLED
-      - ORDERER_GENERAL_TLS_CLIENTROOTCAS
+        #- ORDERER_GENERAL_TLS_ENABLED=true
+        #- ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/tls/orderer/server.key
+        #- ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/tls/orderer/server.crt
+        #- ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/tls/orderer/ca.crt]
+        #- ORDERER_GENERAL_TLS_CLIENTAUTHENABLED
+        #- ORDERER_GENERAL_TLS_CLIENTROOTCAS
     #comment out logging.driver in order to render the debug logs  
-    #logging:
-    #driver: none
+    logging:
+      driver: none
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
@@ -110,12 +110,12 @@ services:
       - CORE_PEER_GOSSIP_BOOTSTRAP=127.0.0.1:7051
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
       - CORE_PEER_EVENTS_ADDRESS=0.0.0.0:7053
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/tls/peer/server.key
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/tls/peer/server.crt
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/tls/peer/ca.crt
-      - CORE_PEER_TLS_CLIENTAUTHREQUIRED
-      - CORE_PEER_TLS_CLIENTROOTCAS_FILES
+        #- CORE_PEER_TLS_ENABLED=true
+        #- CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/tls/peer/server.key
+        #- CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/tls/peer/server.crt
+        #- CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/tls/peer/ca.crt
+        #- CORE_PEER_TLS_CLIENTAUTHREQUIRED
+        #- CORE_PEER_TLS_CLIENTROOTCAS_FILES
       # # the following setting starts chaincode containers on the same
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
@@ -171,12 +171,12 @@ services:
       - CORE_PEER_GOSSIP_BOOTSTRAP=127.0.0.1:8051
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:8051
       - CORE_PEER_EVENTS_ADDRESS=0.0.0.0:8053
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/tls/peer/server.key
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/tls/peer/server.crt
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/tls/peer/ca.crt
-      - CORE_PEER_TLS_CLIENTAUTHREQUIRED
-      - CORE_PEER_TLS_CLIENTROOTCAS_FILES
+        #- CORE_PEER_TLS_ENABLED=true
+        #- CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/tls/peer/server.key
+        #- CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/tls/peer/server.crt
+        #- CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/tls/peer/ca.crt
+        #- CORE_PEER_TLS_CLIENTAUTHREQUIRED
+        #- CORE_PEER_TLS_CLIENTROOTCAS_FILES
       # # the following setting starts chaincode containers on the same
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
@@ -216,6 +216,7 @@ services:
     #driver: none
 
   server:
+    container_name: server
     image: hyperledger/fabric-tools
     working_dir: /test/torrent_server
 #    command: make integration-tests-local
@@ -236,6 +237,7 @@ services:
         aliases:
          - server
   cli:
+    container_name: cli
     image: hyperledger/fabric-tools
     working_dir: /test/torrent_cli
     command: tail -F anything

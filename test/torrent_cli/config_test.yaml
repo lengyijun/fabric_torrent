@@ -234,7 +234,7 @@ organizations:
 #
 orderers:
   orderer.example.com:
-    url: grpcs://orderer.example.com:7050
+    url: grpc://orderer.example.com:7050
 
     # these are standard properties defined by the gRPC library
     # they will be passed in as-is to gRPC client constructor
@@ -253,10 +253,10 @@ orderers:
 peers:
   peer0.org1.example.com:
     # this URL is used to send endorsement and query requests
-    url: grpcs://peer0.org1.example.com:7051
+    url: grpc://peer0.org1.example.com:7051
 
     # this URL is used to connect the EventHub and registering event listeners
-    eventUrl: grpcs://peer0.org1.example.com:7053
+    eventUrl: grpc://peer0.org1.example.com:7053
 
     grpcOptions:
       ssl-target-name-override: peer0.org1.example.com
@@ -267,8 +267,8 @@ peers:
       path: ${GOPATH}/src/github.com/hyperledger/fabric-sdk-go/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
 
   peer0.org2.example.com:
-    url: grpcs://peer0.org2.example.com:8051
-    eventUrl: grpcs://peer0.org2.example.com:8053
+    url: grpc://peer0.org2.example.com:8051
+    eventUrl: grpc://peer0.org2.example.com:8053
     grpcOptions:
       ssl-target-name-override: peer0.org2.example.com
     tlsCACerts:
@@ -281,7 +281,7 @@ peers:
 #
 certificateAuthorities:
   ca.org1.example.com:
-    url: https://ca.org1.example.com:7054
+    url: http://ca.org1.example.com:7054
     # the properties specified under this object are passed to the 'http' client verbatim when
     # making the request to the Fabric-CA server
     httpOptions:
@@ -302,7 +302,7 @@ certificateAuthorities:
     # [Optional] The optional name of the CA.
     caName: ca.org1.example.com
   ca.org2.example.com:
-    url: https://ca.org2.example.com:8054
+    url: http://ca.org2.example.com:8054
     # the properties specified under this object are passed to the 'http' client verbatim when
     # making the request to the Fabric-CA server
     httpOptions:
