@@ -17,3 +17,8 @@ test/fixtures/fabricca/tls/certs/server/ca.org*.example.com-cert.pem
 /test/torrent_test_keyexange/torrent_test_keyexange
 /test/torrent_cli/torrent_cli
 /test/torrent_server/torrent_server
+/test/torrent_cli/encryptdata/
+/test/torrent_cli/origindata/
+/test/torrent_cli/decryptdata/
+/test/torrent_server/decryptdata/
+/test/torrent_server/encryptdata/
