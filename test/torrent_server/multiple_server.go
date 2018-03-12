@@ -33,9 +33,11 @@ import (
 )
 
 const (
-	dataPath="data"
-	org1        = "Org1"
-	org2        = "Org2"
+	origindataPath    = "origindata"
+	encryptdataPath   = "encryptdata"
+	decryptdataPath   = "decryptdata"
+	org1        	  = "Org1"
+	org2              = "Org2"
 )
 
 // Peers
@@ -182,17 +184,22 @@ func main() {
 	clientConfig.DHTConfig = dht.ServerConfig{
 		StartingNodes: serverAddrs,
 	}
-	clientConfig.DataDir = dataPath
+	clientConfig.DataDir = encryptdataPath
 	clientConfig.DisableAggressiveUpload = false
 	client, _ := torrent.NewClient(&clientConfig)
 
-	dir, _ := os.Open(dataPath)
+	dir, _ := os.Open(origindataPath)
 	defer dir.Close()
 
 	fi, _ := dir.Readdir(-1)
 	for _, x := range fi {
 		if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
-			d := makeMagnet(dataPath, x.Name(), client)
+			err:=encryptFile(x.Name())
+			if err!=nil{
+				log.Fatalln("err in encrypt file")
+				return
+			}
+			d := makeMagnet(encryptdataPath, x.Name(), client)
 			fmt.Println(d)
 			upload_AddArgs := [][]byte{[]byte(x.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
 			response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
@@ -205,14 +212,19 @@ func main() {
 		}
 	}
 
+	//monitor origin data path
 	w :=watcher.New()
 	go func(){
 		for{
 			select {
 			case event:=<-w.Event:
-				fmt.Println(event.Op)
 				if event.Op.String()=="CREATE"{
-					d:=makeMagnet(dataPath, event.Name(), client)
+					err:=encryptFile(event.Name())
+					if err!=nil{
+						log.Fatalln("err in encrypt file")
+						return
+					}
+					d:=makeMagnet(encryptdataPath, event.Name(), client)
 					fmt.Println(d)
 					upload_AddArgs := [][]byte{[]byte(event.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
 					response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
@@ -222,6 +234,7 @@ func main() {
 						fmt.Println("username : ",string(response.Payload))
 					}
 				}
+
 			case err:=<-w.Error:
 				log.Fatal(err)
 			case <-w.Closed:
@@ -230,10 +243,7 @@ func main() {
 
 		}
 	}()
-	if err:=w.AddRecursive(dataPath);err!=nil{
-		log.Fatalln(err)
-	}
-	if err:=w.Ignore(dataPath+"/.torrent.bolt.db");err!=nil{
+	if err:=w.AddRecursive(origindataPath);err!=nil{
 		log.Fatalln(err)
 	}
 	if err:=w.Start(time.Millisecond*100);err!=nil{
@@ -256,59 +266,6 @@ func main() {
 	fmt.Println("query chaincode of myapp: ",string(upload_initial))
 
 	testChaincodeEventListener("keyExchange",chClientOrg1User)
-	/*
-
-
-	// Org1 resource manager will instantiate 'example_cc' version 1 on 'orgchannel'
-	err = org1ResMgmt.UpgradeCC("orgchannel", resmgmt.UpgradeCCRequest{Name: "exampleCC", Path: "github.com/example_cc", Version: "1", Args:ExampleCCUpgradeArgs(), Policy: org1Andorg2Policy})
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// Org2 user moves funds on org2 peer (cc policy fails since both Org1 and Org2 peers should participate)
-	response, err = chClientOrg2User.Execute(chclient.Request{ChaincodeID: "exampleCC", Fcn: "invoke", Args:ExampleCCTxArgs()}, chclient.WithProposalProcessor(orgTestPeer1))
-	if err == nil {
-		fmt.Println("Should have failed to move funds due to cc policy")
-	}
-
-	// Org2 user moves funds (cc policy ok since we have provided peers for both Orgs)
-	response, err = chClientOrg2User.Execute(chclient.Request{ChaincodeID: "exampleCC", Fcn: "invoke", Args:ExampleCCTxArgs()}, chclient.WithProposalProcessor(orgTestPeer0, orgTestPeer1))
-	if err != nil {
-		fmt.Println("Failed to move funds: %s", err)
-	}
-
-	// Assert that funds have changed value on org1 peer
-	beforeTxValue, _ := strconv.Atoi(ExampleCCUpgradeB)
-	expectedValue := beforeTxValue + 1
-	verifyValue( chClientOrg1User, expectedValue)
-
-	// Specify user that will be used by dynamic selection service (to retrieve chanincode policy information)
-	// This user has to have privileges to query lscc for chaincode data
-	mychannelUser := selection.ChannelUser{ChannelID: "orgchannel", UserName: "User1", OrgName: "Org1"}
-
-	// Create SDK setup for channel client with dynamic selection
-	sdk, err = fabsdk.New(config.FromFile("./config_test.yaml"),
-		fabsdk.WithServicePkg(&DynamicSelectionProviderFactory{ChannelUsers: []selection.ChannelUser{mychannelUser}}))
-	if err != nil {
-		fmt.Println("Failed to create new SDK: %s", err)
-	}
-
-	// Create new client that will use dynamic selection
-	chClientOrg2User, err = sdk.NewClient(fabsdk.WithUser("User1"), fabsdk.WithOrg(org2)).Channel("orgchannel")
-	if err != nil {
-		fmt.Println("Failed to create new channel client for Org2 user: %s", err)
-	}
-
-	// Org2 user moves funds (dynamic selection will inspect chaincode policy to determine endorsers)
-	response, err = chClientOrg2User.Execute(chclient.Request{ChaincodeID: "exampleCC", Fcn: "invoke", Args:ExampleCCTxArgs()})
-	if err != nil {
-		fmt.Println("Failed to move funds: %s", err)
-	}
-
-	expectedValue++
-	verifyValue( chClientOrg1User, expectedValue)
-
-	*/
 	select {}
 }
 

@@ -51,6 +51,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
         return s.externalTestLocktime(APIstub, args)
     } else if function == "addLocktime" {
         return s.addLocktime(APIstub, args)
+    } else if function == "getAllMagnet"{
+        return s.getAllMagnet(APIstub)
     }
 
     return shim.Error("Invalid Smart Contract function name.")
@@ -372,6 +374,28 @@ func (s *SmartContract) testCertificate(stub shim.ChaincodeStubInterface, args [
     }
     cname := cert.Subject.CommonName
     return cname, nil
+}
+
+func (s *SmartContract) getAllMagnet(stub shim.ChaincodeStubInterface) sc.Response{
+    keysIter, err := stub.GetStateByRange("","")
+    if err != nil {
+        return shim.Error(fmt.Sprintf("keys operation failed. Error accessing state: %s", err))
+    }
+    defer keysIter.Close()
+
+    var m=make([][]byte,0)
+    for keysIter.HasNext() {
+        file := File{}
+        value, iterErr := keysIter.Next()
+        if iterErr != nil {
+            return shim.Error(fmt.Sprintf("keys operation failed. Error accessing state: %s", err))
+        }
+        json.Unmarshal(value.Value,&file)
+        fmt.Println(file.Magnet)
+        m=append(m, []byte(file.Magnet))
+    }
+    return shim.Success(bytes.Join(m,[]byte(",,")))
+
 }
 
 // for test

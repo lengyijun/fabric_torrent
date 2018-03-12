@@ -13,21 +13,23 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabric-client/peer"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
-	"github.com/pkg/errors"
 
 	"github.com/hyperledger/fabric-sdk-go/api/apiconfig"
 	fab "github.com/hyperledger/fabric-sdk-go/api/apifabclient"
 	"github.com/hyperledger/fabric-sdk-go/api/apitxn/chclient"
-	//chmgmt "github.com/hyperledger/fabric-sdk-go/api/apitxn/chmgmtclient"
 	"fmt"
-	"os"
 
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/torrent"
+	"github.com/radovskyb/watcher"
+	"log"
+	"bytes"
 )
 
 const (
-	dataPath	= "data"
+	origindataPath    = "origindata"
+	encryptdataPath   = "encryptdata"
+	decryptdataPath   = "decryptdata"
 	org1        = "Org1"
 	org2        = "Org2"
 )
@@ -90,28 +92,38 @@ func main() {
 	clientConfig.Debug = true
 	clientConfig.DisableTrackers = true
 	clientConfig.ListenAddr = "0.0.0.0:6666"
-	clientConfig.DataDir = dataPath
+	clientConfig.DataDir = encryptdataPath
 	clientConfig.DisableAggressiveUpload = false
 	torrentClient, _ := torrent.NewClient(&clientConfig)
 
-	dir, _ := os.Open(dataPath)
-	defer dir.Close()
-
-	fi, _ := dir.Readdir(-1)
-	for _, x := range fi {
-		if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
-			d := makeMagnet(dataPath, x.Name(), torrentClient)
-			fmt.Println(d)
-			upload_AddArgs := [][]byte{[]byte(x.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
-			_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
-			if err != nil {
-				fmt.Println("Failed to add a magnetlink: %s", err)
-			}
-		}
+	go testChaincodeEventListener("myapp",chClientOrg1User, torrentClient)
+	//retrive all magnet available
+	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "getAllMagnet"})
+	if err!=nil{
 	}
+	allMagnet:=bytes.Split(upload_response.Payload,[]byte(",,"))
+	for _,i :=range(allMagnet){
+		fmt.Println(i)
+		download(torrentClient,string(i))
+	}
+	//dir, _ := os.Open(dataPath)
+	//defer dir.Close()
+	//
+	//fi, _ := dir.Readdir(-1)
+	//for _, x := range fi {
+	//	if !x.IsDir() && x.Name() != ".torrent.bolt.db" {
+	//		d := makeMagnet(dataPath, x.Name(), torrentClient)
+	//		fmt.Println(d)
+	//		upload_AddArgs := [][]byte{[]byte(x.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
+	//		_, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
+	//		if err != nil {
+	//			fmt.Println("Failed to add a magnetlink: %s", err)
+	//		}
+	//	}
+	//}
 
 	time.Sleep(time.Second * 5)
-//replace start
+	//replace start
 /*
 	upload_response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "upload", Fcn: "invoke", Args:upload_QueryArgs})
 	available_magnets :=strings.Split(string(upload_response.Payload),",")
@@ -122,72 +134,45 @@ func main() {
 		download(torrentClient,v)
 	}
 */
-testChaincodeEventListener("myapp",chClientOrg1User, torrentClient)
 	// replace end
+	w :=watcher.New()
+	go func(){
+		for{
+			select {
+			case event:=<-w.Event:
+				if event.Op.String()=="CREATE"{
+					err:=encryptFile(event.Name())
+					if err!=nil{
+						log.Fatalln("err in encrypt file")
+						return
+					}
+					d:=makeMagnet(encryptdataPath, event.Name(),torrentClient)
+					fmt.Println(d)
+					upload_AddArgs := [][]byte{[]byte(event.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
+					response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
+					if err != nil {
+						fmt.Println("Failed to add a magnetlink: %s", err)
+					}else{
+						fmt.Println("username : ",string(response.Payload))
+					}
+				}
+
+			case err:=<-w.Error:
+				log.Fatal(err)
+			case <-w.Closed:
+				return
+			}
+
+		}
+	}()
+	if err:=w.AddRecursive(origindataPath);err!=nil{
+		log.Fatalln(err)
+	}
+	if err:=w.Start(time.Millisecond*100);err!=nil{
+		log.Fatalln(err)
+	}
 
 	select {}
-	/*
-
-
-	// Org1 resource manager will instantiate 'example_cc' version 1 on 'orgchannel'
-	err = org1ResMgmt.UpgradeCC("orgchannel", resmgmt.UpgradeCCRequest{Name: "exampleCC", Path: "github.com/example_cc", Version: "1", Args:ExampleCCUpgradeArgs(), Policy: org1Andorg2Policy})
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// Org2 user moves funds on org2 peer (cc policy fails since both Org1 and Org2 peers should participate)
-	response, err = chClientOrg2User.Execute(chclient.Request{ChaincodeID: "exampleCC", Fcn: "invoke", Args:ExampleCCTxArgs()}, chclient.WithProposalProcessor(orgTestPeer1))
-	if err == nil {
-		fmt.Println("Should have failed to move funds due to cc policy")
-	}
-
-	// Org2 user moves funds (cc policy ok since we have provided peers for both Orgs)
-	response, err = chClientOrg2User.Execute(chclient.Request{ChaincodeID: "exampleCC", Fcn: "invoke", Args:ExampleCCTxArgs()}, chclient.WithProposalProcessor(orgTestPeer0, orgTestPeer1))
-	if err != nil {
-		fmt.Println("Failed to move funds: %s", err)
-	}
-
-	// Assert that funds have changed value on org1 peer
-	beforeTxValue, _ := strconv.Atoi(ExampleCCUpgradeB)
-	expectedValue := beforeTxValue + 1
-	verifyValue( chClientOrg1User, expectedValue)
-
-	// Specify user that will be used by dynamic selection service (to retrieve chanincode policy information)
-	// This user has to have privileges to query lscc for chaincode data
-	mychannelUser := selection.ChannelUser{ChannelID: "orgchannel", UserName: "User1", OrgName: "Org1"}
-
-	// Create SDK setup for channel torrentClient with dynamic selection
-	sdk, err = fabsdk.New(config.FromFile("./config_test.yaml"),
-		fabsdk.WithServicePkg(&DynamicSelectionProviderFactory{ChannelUsers: []selection.ChannelUser{mychannelUser}}))
-	if err != nil {
-		fmt.Println("Failed to create new SDK: %s", err)
-	}
-
-	// Create new torrentClient that will use dynamic selection
-	chClientOrg2User, err = sdk.NewClient(fabsdk.WithUser("User1"), fabsdk.WithOrg(org2)).Channel("orgchannel")
-	if err != nil {
-		fmt.Println("Failed to create new channel torrentClient for Org2 user: %s", err)
-	}
-
-	// Org2 user moves funds (dynamic selection will inspect chaincode policy to determine endorsers)
-	response, err = chClientOrg2User.Execute(chclient.Request{ChaincodeID: "exampleCC", Fcn: "invoke", Args:ExampleCCTxArgs()})
-	if err != nil {
-		fmt.Println("Failed to move funds: %s", err)
-	}
-
-	expectedValue++
-	verifyValue( chClientOrg1User, expectedValue)
-
-	*/
-}
-
-func loadOrgUser( sdk *fabsdk.FabricSDK, orgName string, userName string) fab.IdentityContext {
-
-	session, err := sdk.NewClient(fabsdk.WithUser(userName), fabsdk.WithOrg(orgName)).Session()
-	if err != nil {
-		fmt.Println(errors.Wrapf(err, "Session failed, %s, %s", orgName, userName))
-	}
-	return session
 }
 
 func loadOrgPeers( sdk *fabsdk.FabricSDK) {
@@ -218,7 +203,3 @@ var dht_queryArgs = [][]byte{[]byte("query"), []byte("dht_server")}
 
 var upload_InitArgs = [][]byte{[]byte("init"),[]byte("init"),[]byte("myipaddr:port")}
 var upload_QueryArgs = [][]byte{[]byte("query"), []byte("init")}
-
-func DhtServerInitArgs() [][]byte {
-	return dhtserver_Initargs
-}

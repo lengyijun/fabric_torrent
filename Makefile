@@ -391,7 +391,10 @@ populate-clean:
 temp-clean:
 	-rm -Rf /tmp/enroll_user /tmp/msp /tmp/keyvaluestore /tmp/hfc-kvs /tmp/state
 	-rm -f integration-report.xml report.xml
-	-rm -f test/torrent_cli/data/*
+	-rm -f test/torrent_cli/encryptdata/*
+	-rm -f test/torrent_cli/decryptdata/*
+	-rm -f test/torrent_server/encryptdata/*
+	-rm -f test/torrent_server/decryptdata/*
 
 .PHONY: clean
 clean: temp-clean
