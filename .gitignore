@@ -22,3 +22,7 @@ test/fixtures/fabricca/tls/certs/server/ca.org*.example.com-cert.pem
 /test/torrent_cli/decryptdata/
 /test/torrent_server/decryptdata/
 /test/torrent_server/encryptdata/
+/research/
+/decrypt_file_aes/
+/test/torrent_cli/fabric_secure_file_system/node_modules/
+/test/torrent_server/fabric_secure_file_system/node_modules/
