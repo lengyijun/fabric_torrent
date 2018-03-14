@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body>
+
+      {{{message}}}
+    <div class="container">
+      <div class="container col-md-4">
+        <div class="user">
+          <label for="username">LOGIN AS: </label>
+            <select id="username">
+              <option value="visitor">visitor</option>
+              <option value="admin">admin</option>
+              <option value="user1">user1</option>
+            </select>
+        </div>
+        <div class="navbox">
+          <ul class="nav nav-tabs nav-stacked">
+
+            <li><a href="/">Home Page</a></li>
+            <li><a href="/file-list">File List</a></li>
+            <li><a href="/my-file">My Files</a></li>
+            <li><a href="/request">My requests</a></li>
+            <li><a href="/message">My Messages</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="page-content container col-md-8">
+        <div class="page-header">
+          <h1>{{title}}</h1>
+        </div>
+        {{{body}}}
+      </div>
+
+  </body>
+</html>
+<script>
+  var username = "{{{user}}}";
+</script>
+<script>
+  $(function() {
+    console.log("user", username);
+    if(username) $('select').val(username);
+    $('#username').bind('change', function() {
+      var username = $("#username option:selected").val();
+      $.ajax({
+        url: '/users/login',
+        type: 'post',
+        data: {"username":username}
+      });
+    })
+  });
+</script>

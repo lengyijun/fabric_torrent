@@ -1,0 +1,61 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title">Upload</h3>
+  </div>
+  <div class="panel-body">
+    <form class="form-horizontal" id="upload-form" enctype="multipart/form-data" method="post" action="javascript:">
+      <div class="form-group">
+        <label for="name" class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="name" id="name" placeholder="file name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="keyword" class="col-sm-2 control-label">Keyword</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="keyword" id="keyword" placeholder="file's keywords">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="summary" class="col-sm-2 control-label">Summary</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" name="summary" id="summary" placeholder="file's summary">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="file" class="col-sm-2 control-label">File</label>
+        <div class="col-sm-10">
+          <input type="file" id="file" name="file">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-10 col-sm-10">
+          <button id="upload" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="fileTemplate" style="display:none;">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">File</h3>
+    </div>
+    <div class="panel-body">
+      <strong>Name</strong>: <span class="name">XXX</span><br />
+      <strong>Keyword</strong>: <span class="keyword">XXX</span><br />
+      <strong>Owner</strong>: <span class="owner">XXX</span><br />
+      <strong>Summary</strong>: <span class="summary">XXX</span><br />
+      <button class="btn btn-primary delete" type="button">Delete</button>
+      <button class="btn btn-primary download" type="button">Download</button>
+    </div>
+  </div>
+</div>
+
+<div id="myfile">
+  <!-- load my files (fileTemplate) here -->
+</div>
+
+<script type="text/javascript">var uname = "{{user}}";</script>
+<script src="/javascripts/myfile.js"></script>

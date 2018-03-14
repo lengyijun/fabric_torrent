@@ -1,0 +1,35 @@
+<div>
+  <div class="row">
+    <div class="col-md-2"><label>Keyword</label></div>
+    <div class="col-md-4"><input class="form-control form-keyword" placeholder="search keyword..."></input></div>
+    <div class="col-md-2"><label>Name</label></div>
+    <div class="col-md-4"><input class="form-control form-name" placeholder="search name..."></input></div>
+  </div>
+  <div class="row"> 
+    <div class="col-md-2"><label>Owner</label></div>
+    <div class="col-md-4"><input class="form-control form-owner" placeholder="search owner..."></input></div>
+ 
+    <div class="col-md-offset-4 col-md-2"><button class="btn btn-primary" type="button" id="search">Search File</button></div>
+  </div>
+</div>
+<br />
+<div id="fileTemplate" style="display:none;">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">File</h3>
+    </div>
+    <div class="panel-body">
+      <strong>Name</strong>: <span class="name">XXX</span><br />
+      <strong>Keyword</strong>: <span class="keyword">XXX</span><br />
+      <strong>Owner</strong>: <span class="owner">XXX</span><br />
+      <strong>Summary</strong>: <span class="summary">XXX</span><br />
+      <br /><button class="btn btn-primary request" type="button">Request</button>
+    </div>
+  </div>
+</div>
+
+<div id="filelist">
+  <!-- load my files (fileTemplate) here -->
+</div>
+
+<script src="/javascripts/filelist.js"></script>
