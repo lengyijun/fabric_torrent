@@ -141,14 +141,14 @@ func main() {
 			select {
 			case event:=<-w.Event:
 				if event.Op.String()=="CREATE"{
-					err:=encryptFile(event.Name())
+					key,err:=encryptFile(event.Name())
 					if err!=nil{
 						log.Fatalln("err in encrypt file")
 						return
 					}
 					d:=makeMagnet(encryptdataPath, event.Name(),torrentClient)
 					fmt.Println(d)
-					upload_AddArgs := [][]byte{[]byte(event.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d)}
+					upload_AddArgs := [][]byte{[]byte(event.Name()),[]byte("hash"),[]byte("keywords"),[]byte("Summary"),[]byte(d),[]byte(key)}
 					response, err := chClientOrg1User.Execute(chclient.Request{ChaincodeID: "myapp", Fcn: "createFile", Args:upload_AddArgs})
 					if err != nil {
 						fmt.Println("Failed to add a magnetlink: %s", err)

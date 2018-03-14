@@ -51,6 +51,9 @@ type File struct {
     Keyword string `json:"keyword"`
     Summary string `json:"summary"`
     Owner string `json:"owner"`
+    Locktime int64 `json:"locktime"`
+    Magnet string
+    AESKey string `tempory`
 }
 
 /*
@@ -98,7 +101,6 @@ func (s *SmartContract) requestSecret(APIstub shim.ChaincodeStubInterface, args 
         return shim.Error(err.Error())
     }
 
-
     argsByBytes := [][]byte{[]byte("externalTestLocktime"), []byte(ckey)}
     res := APIstub.InvokeChaincode("myapp", argsByBytes, "")
     if res.Status > 400 {
@@ -119,9 +121,9 @@ func (s *SmartContract) requestSecret(APIstub shim.ChaincodeStubInterface, args 
     if res.Status > 400 {
         return shim.Error("Fail to call file chaincode")
     }
-    if len(res.Payload) <= 2 {
-        return shim.Error("The file is not exist")
-    }
+    //if len(res.Payload) <= 2 {
+    //    return shim.Error("The file is not exist")
+    //}
 
     // get timestamp and tx_id
     tx_id := APIstub.GetTxID()
@@ -141,7 +143,7 @@ func (s *SmartContract) requestSecret(APIstub shim.ChaincodeStubInterface, args 
     messageAsBytes, _ := json.Marshal(message)
     APIstub.SetEvent("requestSecret", messageAsBytes)
 
-    return shim.Success(nil)
+    return shim.Success(res.Payload)//todo
 }
 
 

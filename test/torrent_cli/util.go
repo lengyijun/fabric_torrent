@@ -8,15 +8,16 @@ import (
 	"crypto/rand"
 	"github.com/syndtr/goleveldb/leveldb"
 	"errors"
+	"encoding/hex"
 )
 
 //encrypt file from folder origindataPath to encryptdataPath
-func encryptFile(filename string) error {
+func encryptFile(filename string) (string,error) {
 	// Load your secret key from a safe place and reuse it across multiple
 	// NewCipher calls. (Obviously don't use this example key for anything
 	// real.) If you want to convert a passphrase to a key, use a suitable
 	// package like bcrypt or scrypt.
-	mykey := make([]byte, 16)
+	mykey := make([]byte, 32)
 	_, err := rand.Read(mykey)
 	if err != nil {
 		// handle error here
@@ -25,7 +26,7 @@ func encryptFile(filename string) error {
 	defer db.Close()
 	err = db.Put([]byte(filename), mykey, nil)
 	if err!=nil{
-		return errors.New("unable to put key in db")
+		return "",errors.New("unable to put key in db")
 	}
 
 	inFile, err := os.Open(origindataPath+"/"+filename)
@@ -55,7 +56,7 @@ func encryptFile(filename string) error {
 	if _, err := io.Copy(writer, inFile); err != nil {
 		panic(err)
 	}
-	return nil
+	return hex.EncodeToString(mykey),nil
 
 	// Note that this example is simplistic in that it omits any
 	// authentication of the encrypted data. If you were actually to use

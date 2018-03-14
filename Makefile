@@ -395,6 +395,8 @@ temp-clean:
 	-rm -f test/torrent_cli/decryptdata/*
 	-rm -f test/torrent_server/encryptdata/*
 	-rm -f test/torrent_server/decryptdata/*
+	-rm -f test/torrent_server/fabric_secure_file_system/hfc-key-store
+	-rm -f test/torrent_cli/fabric_secure_file_system/hfc-key-store
 
 .PHONY: clean
 clean: temp-clean

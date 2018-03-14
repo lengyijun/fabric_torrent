@@ -6,7 +6,6 @@ import (
     "encoding/pem"
     "fmt"
     "crypto/x509"
-    "strings"
     "github.com/hyperledger/fabric/core/chaincode/shim"
     sc "github.com/hyperledger/fabric/protos/peer"
 )
@@ -23,6 +22,7 @@ type File struct {
     Owner string `json:"owner"`
     Locktime int64 `json:"locktime"`
     Magnet string
+    AESKey string `tempory`
 }
 
 /*
@@ -64,10 +64,6 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
  */
 func (s *SmartContract) createFile(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-    if len(args) != 5 {
-        return shim.Error("Incorrect number of arguments. Expecting name, hash, keyword, summary")
-    }
-
     uname, err := s.testCertificate(APIstub, nil)
     if err != nil {
         return shim.Error(err.Error())
@@ -86,7 +82,8 @@ func (s *SmartContract) createFile(APIstub shim.ChaincodeStubInterface, args []s
     }
 
     // create an object
-    var file = File{Name: args[0], Hash: args[1], Keyword: args[2], Summary: args[3], Owner: uname, Locktime: 0,Magnet:args[4]}
+    //var file = File{Name: args[0], Hash: args[1], Keyword: args[2], Summary: args[3], Owner: uname, Locktime: 0,Magnet:args[4]}
+    var file = File{Name: args[0], Hash: args[1], Keyword: args[2], Summary: args[3], Owner: uname, Locktime: 0,Magnet:args[4],AESKey:args[5]}
     fileAsBytes, _ := json.Marshal(file)
 
     // we need a relational database as an addition to leveldb
@@ -126,35 +123,43 @@ func (s *SmartContract) queryFile(APIstub shim.ChaincodeStubInterface, args []st
     defer resultsIterator.Close()
 
     // buffer is a JSON array containing query results
-    var buffer bytes.Buffer
-    buffer.WriteString("[")
+    //var buffer bytes.Buffer
+    //buffer.WriteString("[")
 
-    bArrayMemberAlreadyWritten := false
+    //bArrayMemberAlreadyWritten := false
 
-    for resultsIterator.HasNext() {
-        queryResponse, err := resultsIterator.Next()
-        if err != nil {
-            return shim.Error(err.Error())
-        }
-        if bArrayMemberAlreadyWritten == true {
-            buffer.WriteString(",")
-        }
-        buffer.WriteString("{\"Key\":{\"objectType\":")
-        typeString, keys, err := APIstub.SplitCompositeKey(queryResponse.Key)
-        if err != nil {
-            return shim.Error(err.Error())
-        }
-        buffer.WriteString(typeString)
-        buffer.WriteString("\", \"attributes\":[\"")
-        buffer.WriteString(strings.Join(keys, "\", \""))
-        buffer.WriteString("\"]}, \"Record\":")
-        buffer.WriteString(string(queryResponse.Value))
-        buffer.WriteString("}")
-        bArrayMemberAlreadyWritten = true
+    if resultsIterator.HasNext() {
+    	kv,_:=resultsIterator.Next()
+    	file:=File{}
+    	json.Unmarshal(kv.Value,&file)
+    	res:=make([][]byte,2)
+        res[0]=[]byte(file.Name)
+    	res[1]=[]byte(file.AESKey)
+    	return shim.Success(bytes.Join(res,[]byte(",")))
+        //queryResponse, err := resultsIterator.Next()
+        //if err != nil {
+        //    return shim.Error(err.Error())
+        //}
+        //if bArrayMemberAlreadyWritten == true {
+        //    buffer.WriteString(",")
+        //}
+        //buffer.WriteString("{\"Key\":{\"objectType\":")
+        //typeString, keys, err := APIstub.SplitCompositeKey(queryResponse.Key)
+        //if err != nil {
+        //    return shim.Error(err.Error())
+        //}
+        //buffer.WriteString(typeString)
+        //buffer.WriteString("\", \"attributes\":[\"")
+        //buffer.WriteString(strings.Join(keys, "\", \""))
+        //buffer.WriteString("\"]}, \"Record\":")
+        //buffer.WriteString(string(queryResponse.Value))
+        //buffer.WriteString("}")
+        //bArrayMemberAlreadyWritten = true
     }
-    buffer.WriteString("]")
+    //buffer.WriteString("]")
 
-    return shim.Success(buffer.Bytes())
+    return shim.Error("no key")
+    //return shim.Success(buffer.Bytes())
 }
 
 
